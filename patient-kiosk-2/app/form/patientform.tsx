@@ -4,13 +4,17 @@ import TextField from "@/app/form/textfield";
 import NumberField from "@/app/form/numberfield";
 import DateField from "@/app/form/datefield";
 import {useState} from "react"
-export default function PatientForm({isPatient, connectionData, onChange, formState})
+export default function PatientForm(param:any)
 {
+    let isPatient = param.isPatient;
+    let connectionData = param.connectionData;
+    let onChange = param.onChange;
+    let formState = param.formState;
     let headerText = "Patient Information KIOSK"; 
     let value = {};
     let submitButton = (<></>);
     let formStatus = (<></>);
-    let timeout = null;
+    let timeout:ReturnType<typeof setTimeout>;
     const [submitted, setSubmitted] = useState(false);
     if(!isPatient)
     {
@@ -52,15 +56,15 @@ export default function PatientForm({isPatient, connectionData, onChange, formSt
                 </>);
         }
     }
-    function onFieldChange(e)
+    function onFieldChange(e:any)
     {
         if(onChange)
             onChange(e);
-        if(timeout != null)
+        if(timeout)
         {
-            clearInterval(interval);
+            clearInterval(timeout);
         }
-        interval = setTimeout(()=>{
+        timeout = setTimeout(()=>{
             if(formState == "input")
                 connectionData.ws.send(JSON.stringify({type:"room-message", room: "patient0", state: "idle"}));
         }, 3000);
@@ -69,12 +73,12 @@ export default function PatientForm({isPatient, connectionData, onChange, formSt
             connectionData.ws.send(JSON.stringify({type:"room-message", room: "patient0", state: "input"}));
         }
     }
-    function getInputValueAttribute(v)
+    function getInputValueAttribute(v:any)
     {
         if(isPatient) return {};
         else return {value: v};
     }
-    function submit(e)
+    function submit(e:any)
     {
         e.preventDefault();
         console.log(connectionData);
@@ -123,9 +127,9 @@ export default function PatientForm({isPatient, connectionData, onChange, formSt
                 <Form action="/submit" className="w-full">
                     <fieldset disabled={!isPatient || submitted}>
                         <h2 className="text-2xl font-semibold leading-10 tracking-tight text-black">Personal Information</h2>
-                        <TextField label="First Name" name="firstName" onChange={onFieldChange} onValidate={(text) => text} {...getInputValueAttribute(connectionData.formData.firstName)}></TextField>
+                        <TextField label="First Name" name="firstName" onChange={onFieldChange} onValidate={(text:string) => text} {...getInputValueAttribute(connectionData.formData.firstName)}></TextField>
                         <TextField label="Middle Name" name="middleName" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.middleName)}></TextField>
-                        <TextField label="Last Name" name="lastName" onChange={onFieldChange} onValidate={(text) => text} {...getInputValueAttribute(connectionData.formData.lastName)}></TextField>
+                        <TextField label="Last Name" name="lastName" onChange={onFieldChange} onValidate={(text:string) => text} {...getInputValueAttribute(connectionData.formData.lastName)}></TextField>
                         <DateField label="Date of Birth" name="dateOfBirth" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.dateOfBirth)}></DateField>
                         <div className="box-content h-8">
                         <label htmlFor="gender" className="inline-block min-w-[30%] text-black">Gender</label>
@@ -135,10 +139,10 @@ export default function PatientForm({isPatient, connectionData, onChange, formSt
                         </select>
                         </div>
                         <NumberField label="Phone Number" name="phoneNumber" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.phoneNumber)}/>
-                        <TextField label="Email" name="email" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.email)} onValidate={(text)=>{
+                        <TextField label="Email" name="email" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.email)} onValidate={(text:string)=>{
                             return text.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g);
                         }}/>
-                        <TextField label="Address" name="address" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.address)} onValidate={(text) => text}/>
+                        <TextField label="Address" name="address" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.address)} onValidate={(text:string) => text}/>
                         <TextField label="Preferred Language" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.language)} name="language"/>
                         <TextField label="Nationality" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.nationality)} name="nationality"/>
                         <TextField label="Religion" onChange={onFieldChange} {...getInputValueAttribute(connectionData.formData.religion)} name="religion"/>

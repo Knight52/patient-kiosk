@@ -1,10 +1,15 @@
 'use client';
 import PatientForm from "./form/patientform"
-import PatientPopup from "./popup/patient"
 import {useState} from "react"
 import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
-
+import dynamic from 'next/dynamic'
+ 
+const DynamicComponentWithNoSSR = dynamic(
+  () => import('@/app/page'),
+  { ssr: false }
+)
 export default function Home() {
+  const [pageState, setPageState] = useState(0);
   const [formState, setFormState] = useState("input");
   const [showNav, setShowNav] = useState(true);
   const [connectionData, setConnectionData] = useState({
@@ -26,28 +31,40 @@ export default function Home() {
       emergencyContactRelationShip: ""
     }
   });
+  let page = (<></>);
   let navClassName = "content-center m-auto";
   let navLinkClassName = "text-center min-w-xs max-w-xs inline-block flex box-container content-center p-15 m-10 rounded-3xl border border-gray-200";
   const roomName = "patient0";
+  switch(pageState)
+  {
+    case 0: page = (<div className={navClassName}>
+      <a className={navLinkClassName} href="#" onClick={(e:any)=>{ ClickPatient();}}>Patient</a>
+      <a className={navLinkClassName} href="#" onClick={(e:any)=>{ ClickEmployee();}}>Staff</a>
+    </div>); break;
+    case 1: page = (<PatientForm connectionData={connectionData} formState={formState} onChange={onFormDataChange} isPatient={true} />);break;
+    case 2: page = (<PatientForm connectionData={connectionData} formState={formState} isPatient={false} />);break;
+  }
   if(!showNav)
   {
     navClassName += " hidden";
   }
-  function onFormDataChange(e)
+  function onFormDataChange(e:any)
   {
-    connectionData.ws.send(JSON.stringify({type: "room-message", room:"patient0", name: e.target.name, value: e.target.value})); 
+    if(connectionData.ws)
+      (connectionData.ws as WebSocket).send(JSON.stringify({type: "room-message", room:"patient0", name: e.target.name, value: e.target.value})); 
+    
     setConnectionData(x =>
     {
       var outgoing = {...x};
-      outgoing.formData[e.target.name] = e.target.value;
+      (outgoing.formData as any)[e.target.name] = e.target.value;
       return outgoing;
     })
   }
-  function CreateWebSocket(isPatient)
+  function CreateWebSocket(isPatient:boolean)
   {
     const ws = new WebSocket('ws://localhost:4000/api/register');
     ws.onopen = () => {
-      setConnectionData(x=> { return { ...x, ws: ws}});
+      setConnectionData((x:any)=> { return { ...x, ws: ws}});
       console.log('Connected to WebSocket');
       if(isPatient)
       {
@@ -69,7 +86,7 @@ export default function Home() {
       if(data.name && (data.value || data.value == "") && !isPatient)
       {
         setConnectionData(x => {
-          var outgoing = {...x};
+          var outgoing:any = {...x};
           outgoing.formData[data.name] = data.value;
           return outgoing;
         })
@@ -116,7 +133,7 @@ export default function Home() {
           let keys = Object.keys(data.form);
           for(let key in keys)
           {
-            connectionData.formData[keys[key]] = data.form[keys[key]];
+            (connectionData as any).formData[keys[key]] = data.form[keys[key]];
           }
           return outgoing;
         });
@@ -128,23 +145,18 @@ export default function Home() {
   }
   function ClickPatient()
   {
+    setPageState(1);
     CreateWebSocket(true);
   }
   function ClickEmployee()
   {
+    setPageState(2);
     CreateWebSocket(false);
   }
   return (
-    <BrowserRouter>
-      <nav className={navClassName}>
-        <Link className={navLinkClassName} to="/patient" onClick={() => { setShowNav(false); ClickPatient();}}>Patients</Link>
-        <Link className={navLinkClassName} to="/employee" onClick={() => { setShowNav(false); ClickEmployee();}}>Employees</Link>
-      </nav>
-      <Routes>
-        <Route path="/patient" element={<PatientForm connectionData={connectionData} formState={formState} onChange={onFormDataChange} isPatient={true} />}/>
-        <Route path="/employee" element={<PatientForm connectionData={connectionData} formState={formState} isPatient={false} />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+    {page}
+    </>
   );
 }
 

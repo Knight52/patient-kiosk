@@ -1,9 +1,7 @@
 import {useState} from 'react';
 
-let validateFunction = null;
-export default function TextField({label, name, value, onValidate, onChange})
+export default function TextField(param:any)
 {
-    validateFunction = onValidate;
     const [valid,setValid] = useState(true);
     let textboxClassName = "bg-gray-200 text-black";
     let invalidTextClassName = "text-red-600 text-xs";
@@ -15,7 +13,7 @@ export default function TextField({label, name, value, onValidate, onChange})
     {
         textboxClassName += " border border-red-600";
     }
-    function valueAttribute(v)
+    function valueAttribute(v:string)
     {
         if(v != undefined && v != null)
         {
@@ -28,13 +26,13 @@ export default function TextField({label, name, value, onValidate, onChange})
     }
     return (
         <div className="box-content">
-            <label htmlFor={name} className="inline-block min-w-[30%] text-black">{label}</label>
+            <label htmlFor={param.name} className="inline-block min-w-[30%] text-black">{param.label}</label>
             <div>
-                <input name={name} id={name} {...valueAttribute(value)} className={textboxClassName} onChange={(e) => {
-                    if(onValidate)
-                        setValid(onValidate(e.target.value)); 
-                    if(onChange)
-                        onChange(e);
+                <input name={param.name} id={param.name} {...valueAttribute(param.value)} className={textboxClassName} onChange={(e) => {
+                    if(param.onValidate)
+                        setValid(param.onValidate(e.target.value)); 
+                    if(param.onChange)
+                        param.onChange(e);
                 }}/>
                 <p className={invalidTextClassName}>Required *</p>
             </div>
