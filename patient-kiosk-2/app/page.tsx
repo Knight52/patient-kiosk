@@ -5,8 +5,8 @@ import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
 import {createClient} from '@supabase/supabase-js'
  
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  (process.env.NEXT_PUBLIC_SUPABASE_URL as string),
+  (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string)
 );
 export default function Home() {
   const [pageState, setPageState] = useState(0);
@@ -66,7 +66,7 @@ export default function Home() {
   {
     //if(connectionData.ws)
       //(connectionData.ws as WebSocket).send(JSON.stringify({type: "room-message", room:"patient0", name: e.target.name, value: e.target.value})); 
-    let toUpdate = {};
+    let toUpdate:any = {};
     toUpdate[e.target.name] = e.target.value;
     const {error} = await supabase.from('form').update(toUpdate).eq("id", connectionData.id);
     
