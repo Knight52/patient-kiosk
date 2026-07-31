@@ -2,13 +2,15 @@
 import PatientForm from "./form/patientform"
 import {useState} from "react"
 import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
-import dynamic from 'next/dynamic'
+import {createClient} from '@supabase/supabase-js'
  
-const DynamicComponentWithNoSSR = dynamic(
-  () => import('@/app/page'),
-  { ssr: false }
-)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 export default function Home() {
+  console.log(process);
+  console.log(process.env);
   const [pageState, setPageState] = useState(0);
   const [formState, setFormState] = useState("input");
   const [showNav, setShowNav] = useState(true);
