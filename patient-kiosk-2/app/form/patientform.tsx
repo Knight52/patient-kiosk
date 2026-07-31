@@ -4,28 +4,19 @@ import TextField from "@/app/form/textfield";
 import NumberField from "@/app/form/numberfield";
 import DateField from "@/app/form/datefield";
 import {useState} from "react"
+
 export default function PatientForm(param:any)
 {
     let isPatient = param.isPatient;
     let connectionData = param.connectionData;
     let onChange = param.onChange;
-    let formState = param.formState;
     let headerText = "Patient Information KIOSK"; 
     let value = {};
     let submitButton = (<></>);
-    let formStatus = (<></>);
-    let timeout:ReturnType<typeof setTimeout>;
     const [submitted, setSubmitted] = useState(false);
     if(!isPatient)
     {
         headerText = "Tracking Patient Information";
-        formStatus = (
-            <>
-                <div className="fixed text-black">
-                    <p>State: {formState}</p>
-                </div>
-            </>
-        );
     }
     else
     {
@@ -60,18 +51,10 @@ export default function PatientForm(param:any)
     {
         if(onChange)
             onChange(e);
-        if(timeout)
-        {
-            clearInterval(timeout);
-        }
-        timeout = setTimeout(()=>{
-            if(formState == "input")
-                connectionData.ws.send(JSON.stringify({type:"room-message", room: "patient0", state: "idle"}));
-        }, 3000);
-        if(formState == "idle")
-        {
-            connectionData.ws.send(JSON.stringify({type:"room-message", room: "patient0", state: "input"}));
-        }
+        //if(formState == "idle")
+        //{
+            //connectionData.ws.send(JSON.stringify({type:"room-message", room: "patient0", state: "input"}));
+        //}
     }
     function getInputValueAttribute(v:any)
     {
@@ -117,7 +100,6 @@ export default function PatientForm(param:any)
     }
     return (
         <>
-        {formStatus}
         <div className="flex flex-col flex-1 items-center justify-center bg-gray-100 font-sans">
             <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-gray-100 sm:items-start">
                 <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left w-[100%]">
